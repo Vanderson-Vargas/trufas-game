@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Trufas: Ranking</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: linear-gradient(135deg, #3e2723, #795548);
+      color: #333;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+      text-align: center;
+      animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      color: #4e342e;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    input {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 60%;
+      margin-bottom: 15px;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .stats {
+      background: linear-gradient(135deg, #f5f5f5, #eeeeee);
+      padding: 18px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-size: 18px;
+      line-height: 1.6;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    button {
+      padding: 12px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6d4c41, #8d6e63);
+      color: white;
+      cursor: pointer;
+      font-size: 15px;
+      transition: all 0.2s ease;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      background: linear-gradient(135deg, #5d4037, #795548);
+    }
+
+    button:active {
+      transform: scale(0.96);
+    }
+
+    #mensagemFinal {
+      margin-top: 20px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    #ranking {
+      margin-top: 25px;
+      text-align: left;
+      background: #fafafa;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    #ranking h3 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    #ranking li {
+      padding: 6px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    #ranking li:first-child {
+      font-weight: bold;
+      color: #2e7d32;
+    }
+
+    #notificacao {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #212121;
+      color: white;
+      padding: 12px 22px;
+      border-radius: 10px;
+      display: none;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+      font-weight: bold;
+      animation: fadeIn 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+
+<div id="notificacao"></div>
+
+<div class="container">
+  <h1>🍫 Trufas: R$10 → R$10.000</h1>
+
+  <p><strong>Manual:</strong> Compre ingredientes, venda automaticamente e gerencie funcionários. Não deixe o estoque zerar!</p>
+
+  <input id="nickname" placeholder="Seu nome" />
+
+  <div class="stats">
+    💵 Dinheiro: R$ <span id="dinheiro">10</span><br>
+    🍫 Estoque: <span id="estoque">0</span><br>
+    👥 Vendedores: <span id="funcionarios">0</span><br>
+    📈 Vendas: <span id="vendasInfo">0</span>/s<br>
+    💸 Salários: R$ <span id="salarioInfo">0</span>/10s
+  </div>
+
+  <button onclick="comprarIngredientes()">Comprar (R$10 → 8 trufas)</button>
+  <button onclick="contratar()">Contratar (R$80)</button>
+
+  <h2 id="mensagemFinal"></h2>
+
+  <div id="ranking">
+    <h3>🏆 Ranking</h3>
+    <ol id="listaRanking"></ol>
+  </div>
+</div>
+
+<script>
+let dinheiro = 10;
+let estoque = 0;
+let funcionarios = 0;
+let jogoAtivo = false;
+let inicioTempo = null;
+
+const precoTrufa = 8;
+const salario = 10;
+const objetivo = 10000;
+
+function notificar(msg) {
+  const box = document.getElementById("notificacao");
+  box.innerText = msg;
+  box.style.display = "block";
+  setTimeout(()=> box.style.display="none", 2000);
+}
+
+function atualizarTela() {
+  document.getElementById("dinheiro").innerText = dinheiro;
+  document.getElementById("estoque").innerText = estoque;
+  document.getElementById("funcionarios").innerText = funcionarios;
+  document.getElementById("vendasInfo").innerText = 1 + funcionarios;
+  document.getElementById("salarioInfo").innerText = funcionarios * salario;
+}
+
+function comprarIngredientes() {
+  if (dinheiro >= 10) {
+    if (!jogoAtivo) {
+      jogoAtivo = true;
+      inicioTempo = Date.now();
+    }
+    dinheiro -= 10;
+    estoque += 8;
+    notificar("+8 trufas");
+    atualizarTela();
+  }
+}
+
+function contratar() {
+  if (!jogoAtivo) return;
+  if (dinheiro >= 80) {
+    dinheiro -= 80;
+    funcionarios++;
+    atualizarTela();
+  }
+}
+
+function salvarRanking(tempo) {
+  let nome = document.getElementById("nickname").value || "Anônimo";
+  let ranking = JSON.parse(localStorage.getItem("ranking")) || [];
+
+  ranking.push({ nome, tempo });
+  ranking.sort((a,b)=> a.tempo - b.tempo);
+  ranking = ranking.slice(0,5);
+
+  localStorage.setItem("ranking", JSON.stringify(ranking));
+  mostrarRanking();
+}
+
+function mostrarRanking() {
+  const lista = document.getElementById("listaRanking");
+  lista.innerHTML = "";
+  let ranking = JSON.parse(localStorage.getItem("ranking")) || [];
+
+  ranking.sort((a,b)=> a.tempo - b.tempo);
+
+  ranking.forEach(r => {
+    const li = document.createElement("li");
+    const min = Math.floor(r.tempo / 60);
+    const seg = r.tempo % 60;
+    li.innerText = `${r.nome} - ${min}m ${seg}s`;
+    lista.appendChild(li);
+  });
+}
+
+function gameOver() {
+  jogoAtivo = false;
+  document.getElementById("mensagemFinal").innerText = "💀 Game Over";
+}
+
+function vitoria() {
+  jogoAtivo = false;
+  let tempo = Math.floor((Date.now() - inicioTempo)/1000);
+  document.getElementById("mensagemFinal").innerText = `🎉 Vitória em ${tempo}s!`;
+  salvarRanking(tempo);
+}
+
+setInterval(()=>{
+  if (!jogoAtivo) return;
+
+  if (estoque === 0) {
+    gameOver();
+    return;
+  }
+
+  let vendas = Math.min(estoque, 1 + funcionarios);
+  estoque -= vendas;
+  dinheiro += vendas * precoTrufa;
+
+  if (dinheiro >= objetivo) vitoria();
+
+  atualizarTela();
+},1000);
+
+setInterval(()=>{
+  if (!jogoAtivo) return;
+  let custo = funcionarios * salario;
+
+  if (dinheiro < custo && funcionarios > 0) {
+    gameOver();
+    return;
+  }
+
+  dinheiro -= custo;
+  atualizarTela();
+},10000);
+
+mostrarRanking();
+atualizarTela();
+</script>
+
+</body>
+</html>
